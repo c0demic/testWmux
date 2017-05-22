@@ -1,0 +1,72 @@
+buildscript{
+    repositories {
+        maven{
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.moowork.gradle:gradle-node-plugin:1.1.1"
+    }
+}
+plugins{
+    id "com.moowork.node" version "1.1.1"
+    id "com.moowork.grunt" version "1.1.1"
+}
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'com.moowork.node'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+yarn_cache_clean{
+    args = ['--no-emoji', '--json']
+}
+
+yarn_install.dependsOn(yarn_cache_clean)
+
+task addExpress(type: YarnTask){
+    args=['add'
+          ,'babel-plugin-transform-class-properties','redux-form', 'react-redux', 'react-router', 'history'
+          , 'react-router-dom', 'react-router-redux', 'react-router-config'
+          ,'jsx-loader', 'aphrodite', 'css-loader', 'style-loader', 'react-css-modules', 'postcss', 'postcss-cssnext'
+          ,'babel-plugin-transform-es2015-classes', 'babel-plugin-transform-decorators-legacy', 'radium', 'prop-types'
+          , 'babel-plugin-syntax-decorators', 'path', 'material-ui','less','less-loader'
+          ,'react-tap-event-plugin','formsy-material-ui','grommet','paper','file-loader','react','jsx','react-dom'
+          ,'redux','babel-cli','babel-loader','babel-core','babel-preset-es2015','babel-preset-es2017'
+          ,'babel-preset-react','babel-preset-stage-0','babel-preset-stage-1','babel-preset-stage-2','webpack'
+          ,'--dev']
+}
+
+task removeExpress(type: YarnTask){
+    args=['remove'
+          ,'babel-plugin-transform-class-properties','redux-form','react-redux', 'react-router', 'history'
+          , 'react-router-dom', 'react-router-redux', 'react-router-config'
+          ,'jsx-loader', 'aphrodite', 'css-loader', 'style-loader', 'react-css-modules', 'postcss', 'postcss-cssnext'
+          ,'babel-plugin-transform-es2015-classes', 'babel-plugin-transform-decorators-legacy', 'radium', 'prop-types'
+          , 'babel-plugin-syntax-decorators', 'path', 'material-ui','less','less-loader'
+          ,'react-tap-event-plugin','formsy-material-ui','grommet','paper','file-loader','react','jsx','react-dom'
+          ,'redux','babel-cli','babel-loader','babel-core','babel-preset-es2015','babel-preset-es2017'
+          ,'babel-preset-react','babel-preset-stage-0','babel-preset-stage-1','babel-preset-stage-2','webpack'
+          ,'-D']
+}
+
+task bundle(type: YarnTask){
+    inputs.file('package.json')
+    inputs.file('webpack.config.js')
+
+/*    outputs.dir('src/main/webapp/dbapp')*/
+    dependsOn yarn_install
+    args = ['run', 'build']
+}
+
+war.mustRunAfter bundle
